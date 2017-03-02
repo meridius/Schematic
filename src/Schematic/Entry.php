@@ -5,13 +5,17 @@ namespace Schematic;
 use InvalidArgumentException;
 
 
-class Entry
+class Entry implements IEntry
 {
 
 	const INDEX_ENTRYCLASS = 0;
 	const INDEX_MULTIPLICITY = 1;
 	const INDEX_EMBEDDING = 2;
 	const INDEX_NULLABLE = 3;
+	const INDEX_ENTRIESCLASS = 4;
+
+	const INDEX_ENTRY_INFO_ENTRY = 0;
+	const INDEX_ENTRY_INFO_ENTRIES = 1;
 
 	/**
 	 * @var array
@@ -63,12 +67,31 @@ class Entry
 	{
 		self::$parsedAssociations[$class] = [];
 
-		foreach (static::$associations as $association => $entryClass) {
+		foreach (static::$associations as $association => $entryInfo) {
 			$matches = [];
 			$result = preg_match('#^(\?)?([^.[\]]+)(\.[^.[\]]*)?(\[\])?$#', $association, $matches);
 
 			if ($result === 0 || (!empty($matches[3]) && !empty($matches[4]))) {
 				throw new InvalidArgumentException('Invalid association definition given: ' . $association);
+			}
+
+			if (is_array($entryInfo)) {
+				if (count($entryInfo) !== 2) {
+					throw new InvalidArgumentException(sprintf(
+						"Number of custom association parameters for '%s' must be exactly %d.",
+						$association,
+						2
+					));
+				}
+
+				$entryClass = $entryInfo[self::INDEX_ENTRY_INFO_ENTRY];
+				$entriesClass = $entryInfo[self::INDEX_ENTRY_INFO_ENTRIES];
+
+				self::validateCustomMultiplicityAssociation($entryClass, $association, self::INDEX_ENTRY_INFO_ENTRY);
+				self::validateCustomMultiplicityAssociation($entriesClass, $association, self::INDEX_ENTRY_INFO_ENTRIES);
+			} else {
+				$entryClass = $entryInfo;
+				$entriesClass = null;
 			}
 
 			self::$parsedAssociations[$class][$matches[2]] = [
@@ -78,7 +101,31 @@ class Entry
 					($matches[3] === '.' ? $matches[2] . '_' : substr($matches[3], 1)) :
 					FALSE,
 				self::INDEX_NULLABLE => !empty($matches[1]),
+				self::INDEX_ENTRIESCLASS => $entriesClass,
 			];
+		}
+	}
+
+
+	/**
+	 * @param string $classGiven
+	 * @param string $association
+	 * @param int $index
+	 */
+	private static function validateCustomMultiplicityAssociation($classGiven, $association, $index)
+	{
+		$params = [
+			self::INDEX_ENTRY_INFO_ENTRY => ['First', IEntry::class],
+			self::INDEX_ENTRY_INFO_ENTRIES => ['Second', IEntries::class],
+		];
+
+		if (!is_a($classGiven, $params[$index][1], TRUE)) {
+			throw new InvalidArgumentException(sprintf(
+				"%s parameter of association for '%s' must be instance of '%s'.",
+				$params[$index][0],
+				$association,
+				$params[$index][1]
+			));
 		}
 	}
 
@@ -108,7 +155,7 @@ class Entry
 		}
 
 		$entryClass = $association[self::INDEX_ENTRYCLASS];
-		$entriesClass = $this->entriesClass;
+		$entriesClass = $association[self::INDEX_ENTRIESCLASS] ?: $this->entriesClass;
 
 		return $this->data[$name] = $association[self::INDEX_MULTIPLICITY] ?
 			new $entriesClass($data, $entryClass) :
