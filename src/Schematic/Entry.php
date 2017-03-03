@@ -23,7 +23,17 @@ class Entry implements IEntry
 	protected static $associations = [];
 
 	/**
-	 * @var array entryClass => [INDEX_ENTRYCLASS => relatedEntryClass, INDEX_MULTIPLICITY => multiplicity, INDEX_EMBEDDING => embedding, INDEX_NULLABLE => null value allowed]
+	 * @var string
+	 */
+	protected static $entriesClass = Entries::class;
+
+	/**
+	 * @var array entryClass => [
+	 *     INDEX_ENTRYCLASS => relatedEntryClass,
+	 *     INDEX_MULTIPLICITY => multiplicity,
+	 *     INDEX_EMBEDDING => embedding,
+	 *     INDEX_NULLABLE => null value allowed,
+	 * ]
 	 */
 	private static $parsedAssociations = [];
 
@@ -37,24 +47,25 @@ class Entry implements IEntry
 	 */
 	private $data;
 
-	/**
-	 * @var string
-	 */
-	private $entriesClass;
-
 
 	/**
 	 * @param array $data
 	 * @param string $entriesClass
 	 */
-	public function __construct(array $data, $entriesClass = Entries::class)
+	public function __construct(array $data, $entriesClass = null)
 	{
-		if ($entriesClass !== Entries::class && !is_a($entriesClass, IEntries::class, TRUE)) {
-			throw new InvalidArgumentException('Entries class must implement IEntries interface.');
-		}
-
 		$this->data = $data;
-		$this->entriesClass = $entriesClass;
+
+		if ($entriesClass) {
+			if (!is_a($entriesClass, IEntries::class, TRUE)) {
+				throw new InvalidArgumentException(sprintf(
+					'Entries class must implement %s interface.',
+					IEntries::class
+				));
+			}
+
+			self::$entriesClass = $entriesClass;
+		}
 
 		$this->initParsedAssociations();
 	}
@@ -155,11 +166,11 @@ class Entry implements IEntry
 		}
 
 		$entryClass = $association[self::INDEX_ENTRYCLASS];
-		$entriesClass = $association[self::INDEX_ENTRIESCLASS] ?: $this->entriesClass;
+		$entriesClass = $association[self::INDEX_ENTRIESCLASS] ?: self::$entriesClass;
 
 		return $this->data[$name] = $association[self::INDEX_MULTIPLICITY] ?
 			new $entriesClass($data, $entryClass) :
-			new $entryClass($data, $this->entriesClass);
+			new $entryClass($data, self::$entriesClass);
 	}
 
 

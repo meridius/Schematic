@@ -11,14 +11,14 @@ class Entries implements Iterator, IEntries
 {
 
 	/**
+	 * @var string
+	 */
+	protected static $entryClass = Entry::class;
+
+	/**
 	 * @var array
 	 */
 	private $items;
-
-	/**
-	 * @var string
-	 */
-	private $entryClass;
 
 	/**
 	 * @var array
@@ -30,10 +30,20 @@ class Entries implements Iterator, IEntries
 	 * @param array $items
 	 * @param string $entryClass
 	 */
-	public function __construct(array $items, $entryClass = Entry::class)
+	public function __construct(array $items, $entryClass = null)
 	{
 		$this->items = $items;
-		$this->entryClass = $entryClass;
+
+		if ($entryClass) {
+			if (!is_a($entryClass, IEntry::class, TRUE)) {
+				throw new InvalidArgumentException(sprintf(
+					'Entries class must implement %s interface.',
+					IEntry::class
+				));
+			}
+
+			self::$entryClass = $entryClass;
+		}
 
 		$this->rewind();
 	}
@@ -118,7 +128,7 @@ class Entries implements Iterator, IEntries
 			return $this->cachedItems[$key];
 		}
 
-		$entryClass = $this->entryClass;
+		$entryClass = self::$entryClass;
 
 		return $this->cachedItems[$key] = new $entryClass($this->items[$key], get_called_class());
 	}
@@ -134,7 +144,7 @@ class Entries implements Iterator, IEntries
 
 		$items = array_diff_key($this->items, array_flip($keys));
 
-		return new static($items, $this->entryClass);
+		return new static($items, self::$entryClass);
 	}
 
 
@@ -148,7 +158,7 @@ class Entries implements Iterator, IEntries
 
 		$items = array_intersect_key($this->items, array_flip($keys));
 
-		return new static($items, $this->entryClass);
+		return new static($items, self::$entryClass);
 	}
 
 
@@ -159,7 +169,7 @@ class Entries implements Iterator, IEntries
 	 */
 	public function transform(Closure $callback, $entryClass = NULL)
 	{
-		return new static($callback($this->items), $entryClass !== NULL ? $entryClass : $this->entryClass);
+		return new static($callback($this->items), $entryClass !== NULL ? $entryClass : self::$entryClass);
 	}
 
 
