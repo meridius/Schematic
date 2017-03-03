@@ -98,6 +98,26 @@ class Book extends Identified
 
 
 /**
+ * @property-read mixed $value
+ * @property-read UniversalProperties $valueRequired
+ * @property-read UniversalProperties|null $valueNullable
+ * @property-read UniversalProperties[] $valuesRequired
+ * @property-read UniversalProperties[]|null $valuesNullable
+ */
+class UniversalProperties extends Entry
+{
+
+	protected static $associations = [
+		'valueRequired' => UniversalProperties::class,
+		'?valueNullable' => UniversalProperties::class,
+		'valuesRequired[]' => UniversalProperties::class,
+		'?valuesNullable[]' => UniversalProperties::class,
+	];
+
+}
+
+
+/**
  * @property-read Person[] $indexedInformation
  */
 class Registry extends Entry
