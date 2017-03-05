@@ -147,7 +147,7 @@ class Entry implements IEntry
 	 */
 	public function __get($name)
 	{
-		$calledClass = get_called_class();
+		$calledClass = static::class;
 
 		if (!isset(self::$parsedAssociations[$calledClass][$name]) || isset($this->initializedAssociations[$name])) {
 			return $this->readData($name);
@@ -239,7 +239,7 @@ class Entry implements IEntry
 
 	private function initParsedAssociations()
 	{
-		if (!array_key_exists($calledClass = get_called_class(), self::$parsedAssociations)) {
+		if (!array_key_exists($calledClass = static::class, self::$parsedAssociations)) {
 			self::parseAssociations($calledClass);
 		}
 	}

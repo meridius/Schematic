@@ -130,7 +130,7 @@ class Entries implements Iterator, IEntries
 
 		$entryClass = self::$entryClass;
 
-		return $this->cachedItems[$key] = new $entryClass($this->items[$key], get_called_class());
+		return $this->cachedItems[$key] = new $entryClass($this->items[$key], static::class);
 	}
 
 
