@@ -108,9 +108,9 @@ class Entry implements IEntry
 			self::$parsedAssociations[$class][$matches[2]] = [
 				self::INDEX_ENTRYCLASS => $entryClass,
 				self::INDEX_MULTIPLICITY => !empty($matches[4]),
-				self::INDEX_EMBEDDING => !empty($matches[3]) ?
-					($matches[3] === '.' ? $matches[2] . '_' : substr($matches[3], 1)) :
-					FALSE,
+				self::INDEX_EMBEDDING => !empty($matches[3])
+					? ($matches[3] === '.' ? $matches[2] . '_' : substr($matches[3], 1))
+					: FALSE,
 				self::INDEX_NULLABLE => !empty($matches[1]),
 				self::INDEX_ENTRIESCLASS => $entriesClass,
 			];
@@ -157,9 +157,9 @@ class Entry implements IEntry
 
 		$association = self::$parsedAssociations[$calledClass][$name];
 
-		$data = $association[self::INDEX_EMBEDDING] !== FALSE ?
-			$this->readEmbeddedEntry($association[self::INDEX_EMBEDDING]) :
-			$this->readData($name);
+		$data = $association[self::INDEX_EMBEDDING] !== FALSE
+			? $this->readEmbeddedEntry($association[self::INDEX_EMBEDDING])
+			: $this->readData($name);
 
 		if ($data === NULL || ($association[self::INDEX_NULLABLE] && static::isEmpty($data))) {
 			return $this->data[$name] = NULL;
@@ -168,9 +168,9 @@ class Entry implements IEntry
 		$entryClass = $association[self::INDEX_ENTRYCLASS];
 		$entriesClass = $association[self::INDEX_ENTRIESCLASS] ?: self::$entriesClass;
 
-		return $this->data[$name] = $association[self::INDEX_MULTIPLICITY] ?
-			new $entriesClass($data, $entryClass) :
-			new $entryClass($data, self::$entriesClass);
+		return $this->data[$name] = $association[self::INDEX_MULTIPLICITY]
+			? new $entriesClass($data, $entryClass)
+			: new $entryClass($data, self::$entriesClass);
 	}
 
 
