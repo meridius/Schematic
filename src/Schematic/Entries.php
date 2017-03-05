@@ -193,7 +193,10 @@ class Entries implements Iterator, IEntries
 
 		$missingKeys = array_diff_key($keys, $this->items);
 		if ($missingKeys !== []) {
-			throw new InvalidArgumentException('Missing entries with keys: ' . implode(', ', array_keys($missingKeys)) . '.');
+			throw new InvalidArgumentException(sprintf(
+			    'Missing entries with keys: %s.',
+                implode(', ', array_keys($missingKeys))
+            ));
 		}
 	}
 
