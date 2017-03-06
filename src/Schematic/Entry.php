@@ -201,6 +201,15 @@ class Entry implements IEntry
 
 
 	/**
+	 * @return array
+	 */
+	public function toArray()
+	{
+		return $this->data;
+	}
+
+
+	/**
 	 * @param string $prefix
 	 * @return array|NULL
 	 */

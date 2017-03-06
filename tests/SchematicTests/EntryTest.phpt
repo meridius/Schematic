@@ -513,6 +513,30 @@ class EntryTest extends TestCase
 		Assert::count(count($ids), $registry->indexedInformation);
 	}
 
+
+    public function testToArray()
+    {
+		$data = [
+			'orderItems' => [
+				[
+					'id' => 1,
+					'tags' => [
+						['name' => 'first-order'],
+						['name' => 'premium'],
+					],
+				],
+				[
+					'id' => 2,
+					'tags' => [],
+				],
+			],
+		];
+
+        $array = (new Order($data))->toArray();
+
+        Assert::same($data, $array);
+    }
+
 }
 
 
