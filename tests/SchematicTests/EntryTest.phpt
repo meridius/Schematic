@@ -309,7 +309,7 @@ class EntryTest extends TestCase
 
 		Assert::exception(function () use ($order) {
 			$order->created;
-		}, InvalidArgumentException::class, "Missing field 'created'.");
+		}, InvalidArgumentException::class, "Object 'SchematicTests\\Order' is missing field 'created'.");
 	}
 
 

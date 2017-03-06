@@ -230,7 +230,11 @@ class Entry implements IEntry
 	private function readData($field)
 	{
 		if (!array_key_exists($field, $this->data)) {
-			throw new InvalidArgumentException("Missing field '$field'.");
+			throw new InvalidArgumentException(sprintf(
+			    "Object '%s' is missing field '%s'.",
+                static::class,
+                $field
+            ));
 		}
 
 		return $this->data[$field];
