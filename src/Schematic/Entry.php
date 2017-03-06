@@ -64,7 +64,7 @@ class Entry implements IEntry
 				));
 			}
 
-			self::$entriesClass = $entriesClass;
+			static::$entriesClass = $entriesClass;
 		}
 
 		$this->initParsedAssociations();
@@ -112,7 +112,7 @@ class Entry implements IEntry
 					? ($matches[3] === '.' ? $matches[2] . '_' : substr($matches[3], 1))
 					: FALSE,
 				self::INDEX_NULLABLE => !empty($matches[1]),
-				self::INDEX_ENTRIESCLASS => $entriesClass,
+				self::INDEX_ENTRIESCLASS => $entriesClass ?: static::$entriesClass,
 			];
 		}
 	}
@@ -166,11 +166,11 @@ class Entry implements IEntry
 		}
 
 		$entryClass = $association[self::INDEX_ENTRYCLASS];
-		$entriesClass = $association[self::INDEX_ENTRIESCLASS] ?: self::$entriesClass;
+		$entriesClass = $association[self::INDEX_ENTRIESCLASS];
 
 		return $this->data[$name] = $association[self::INDEX_MULTIPLICITY]
 			? new $entriesClass($data, $entryClass)
-			: new $entryClass($data, self::$entriesClass);
+			: new $entryClass($data, $entriesClass);
 	}
 
 
@@ -243,7 +243,9 @@ class Entry implements IEntry
 
 	private function initParsedAssociations()
 	{
-		if (!array_key_exists($calledClass = static::class, self::$parsedAssociations)) {
+        $calledClass = static::class;
+
+		if (!array_key_exists($calledClass, self::$parsedAssociations)) {
 			self::parseAssociations($calledClass);
 		}
 	}

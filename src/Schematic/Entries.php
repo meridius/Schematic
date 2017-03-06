@@ -42,7 +42,7 @@ class Entries implements Iterator, IEntries
 				));
 			}
 
-			self::$entryClass = $entryClass;
+			static::$entryClass = $entryClass;
 		}
 
 		$this->rewind();
@@ -128,7 +128,7 @@ class Entries implements Iterator, IEntries
 			return $this->cachedItems[$key];
 		}
 
-		$entryClass = self::$entryClass;
+		$entryClass = static::$entryClass;
 
 		return $this->cachedItems[$key] = new $entryClass($this->items[$key], static::class);
 	}
@@ -144,7 +144,7 @@ class Entries implements Iterator, IEntries
 
 		$items = array_diff_key($this->items, array_flip($keys));
 
-		return new static($items, self::$entryClass);
+		return new static($items, static::$entryClass);
 	}
 
 
@@ -158,7 +158,7 @@ class Entries implements Iterator, IEntries
 
 		$items = array_intersect_key($this->items, array_flip($keys));
 
-		return new static($items, self::$entryClass);
+		return new static($items, static::$entryClass);
 	}
 
 
@@ -169,7 +169,7 @@ class Entries implements Iterator, IEntries
 	 */
 	public function transform(Closure $callback, $entryClass = NULL)
 	{
-		return new static($callback($this->items), $entryClass !== NULL ? $entryClass : self::$entryClass);
+		return new static($callback($this->items), $entryClass !== NULL ? $entryClass : static::$entryClass);
 	}
 
 
