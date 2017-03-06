@@ -157,9 +157,17 @@ class Entry implements IEntry
 
 		$association = self::$parsedAssociations[$calledClass][$name];
 
-		$data = $association[self::INDEX_EMBEDDING] !== FALSE
-			? $this->readEmbeddedEntry($association[self::INDEX_EMBEDDING])
-			: $this->readData($name);
+		if ($association[self::INDEX_EMBEDDING] !== FALSE) {
+            $data = $this->readEmbeddedEntry($association[self::INDEX_EMBEDDING]);
+        } elseif ($association[self::INDEX_NULLABLE]) {
+            try {
+                $data = $this->readData($name);
+            } catch (InvalidArgumentException $e) {
+                $data = NULL;
+            }
+        } else {
+            $data = $this->readData($name);
+        }
 
 		if ($data === NULL || ($association[self::INDEX_NULLABLE] && static::isEmpty($data))) {
 			return $this->data[$name] = NULL;

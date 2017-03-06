@@ -332,6 +332,7 @@ class EntryTest extends TestCase
 		Assert::same(100, $order->customer->id);
 	}
 
+
 	/**
 	 * @dataProvider provideEmptyScalarValues
 	 * @dataProvider provideNullValue
@@ -341,6 +342,15 @@ class EntryTest extends TestCase
 	{
 		$order = new Order([
 			'customer' => $customer,
+			'orderItems' => [],
+		]);
+		Assert::null($order->customer);
+	}
+
+
+	public function testAccessToUndefinedNullableParameter()
+	{
+		$order = new Order([
 			'orderItems' => [],
 		]);
 		Assert::null($order->customer);
